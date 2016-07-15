@@ -46,6 +46,12 @@ galera_run_dir:
     - pkg: galera_packages
 {%- endif %}
 
+galera_stop_service:
+  service.dead:
+  - name: {{ master.service }}
+  - require:
+    - pkg: galera_packages
+
 galera_init_script:
   file.managed:
   - name: /etc/init.d/mysql
@@ -53,6 +59,7 @@ galera_init_script:
   - mode: 755
   - require: 
     - pkg: galera_packages
+    - service: galera_stop_service
 
 galera_bootstrap_script:
   file.managed:
@@ -72,6 +79,7 @@ galera_bootstrap_temp_config:
   - require: 
     - pkg: galera_packages
     - file: galera_init_script
+    - service: galera_stop_service
 
 galera_bootstrap_start_service:
   cmd.run:
@@ -80,6 +88,7 @@ galera_bootstrap_start_service:
     - file: galera_bootstrap_temp_config
     - file: galera_run_dir
     - file: galera_bootstrap_script
+    - service: galera_stop_service
 
 galera_bootstrap_set_root_password:
   cmd.run:
