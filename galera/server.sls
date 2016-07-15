@@ -2,11 +2,33 @@
 
 {%- set server = pillar.mysql.server %}
 
+{%- set mysql_connection_unix_socket = '/var/run/mysqld/mysqld.sock' %}
+{%- set mysql_connection_db = 'mysql' %}
+{%- set mysql_connection_charset = 'utf8' %}
+
+{%- if pillar.galera.master is defined and pillar.galera.master.admin is defined %}
+{%- set mysql_connection_config = pillar.galera.master.admin %}
+{%- elif pillar.galera.slave is defined and pillar.galera.slave.admin is defined %}
+{%- set mysql_connection_config = pillar.galera.slave.admin %}
+{%- endif %}
+
+{%- if mysql_connection_config is defined %}
+  {%- set mysql_connection_user = mysql_connection_config.user %}
+  {%- set mysql_connection_pass = mysql_connection_config.password %}
+{%- else %}
+  {%- set mysql_connection_user = 'root' %}
+  {%- set mysql_connection_pass = '' %}
+{%- endif %}
+
 {%- for database_name, database in server.get('database', {}).iteritems() %}
 
 mysql_database_{{ database_name }}:
   mysql_database.present:
   - name: {{ database_name }}
+  - connection_user: {{ mysql_connection_user }}
+  - connection_pass: {{ mysql_connection_pass }}
+  - connection_unix_socket: {{ mysql_connection_unix_socket }}
+  - connection_charset: {{ mysql_connection_charset }}
 
 {%- for user in database.users %}
 
@@ -15,6 +37,8 @@ mysql_user_{{ user.name }}_{{ database_name }}_{{ user.host }}:
   - host: '{{ user.host }}'
   - name: '{{ user.name }}'
   - password: {{ user.password }}
+  - use:
+    - mysql_database: mysql_database_{{ database_name }}
 
 mysql_grants_{{ user.name }}_{{ database_name }}_{{ user.host }}:
   mysql_grants.present:
@@ -24,6 +48,8 @@ mysql_grants_{{ user.name }}_{{ database_name }}_{{ user.host }}:
   - host: '{{ user.host }}'
   - require:
     - mysql_user: mysql_user_{{ user.name }}_{{ database_name }}_{{ user.host }}
+    - mysql_database: mysql_database_{{ database_name }}
+  - use:
     - mysql_database: mysql_database_{{ database_name }}
 
 {%- endfor %}
@@ -64,6 +90,10 @@ mysql_user_{{ user.name }}_{{ user.host }}:
   {%- else %}
   - allow_passwordless: True
   {%- endif %}
+  - connection_user: {{ mysql_connection_user }}
+  - connection_pass: {{ mysql_connection_pass }}
+  - connection_unix_socket: {{ mysql_connection_unix_socket }}
+  - connection_charset: {{ mysql_connection_charset }}
 
 {%- endfor %}
 
