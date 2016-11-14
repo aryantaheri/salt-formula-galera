@@ -1,7 +1,7 @@
 
 {%- set master = salt['grains.filter_by']({
   'Debian': {
-    'pkgs': ['mysql-wsrep-5.6', 'galera-3', 'rsync', 'python-mysqldb', 'libmysqlclient18', 'psmisc', 'netcat', 'percona-xtrabackup', 'socat'],
+    'pkgs': ['mysql-server-wsrep-5.6', 'galera-3', 'rsync', 'python-mysqldb', 'libmysqlclient18', 'psmisc', 'netcat', 'percona-xtrabackup', 'socat'],
     'service': 'mysql',
     'wsrep_provider': '/usr/lib/galera/libgalera_smm.so',
     'log_file': '/var/log/mysql.log',
@@ -17,11 +17,11 @@
     'socket': '/var/run/mariadb/mysqld.sock',
     'config': '/etc/my.cnf',
   },
-}, merge=salt['pillar.get']('galera:master')) %}
+}, merge=pillar.galera.get('master', {})) %}
 
 {%- set slave = salt['grains.filter_by']({
   'Debian': {
-    'pkgs': ['mysql-wsrep-5.6', 'galera-3', 'rsync', 'python-mysqldb', 'libmysqlclient18', 'psmisc', 'netcat', 'percona-xtrabackup', 'socat'],
+    'pkgs': ['mysql-server-wsrep-5.6', 'galera-3', 'rsync', 'python-mysqldb', 'libmysqlclient18', 'psmisc', 'netcat', 'percona-xtrabackup', 'socat'],
     'service': 'mysql',
     'wsrep_provider': '/usr/lib/galera/libgalera_smm.so',
     'log_file': '/var/log/mysql.log',
@@ -37,4 +37,4 @@
     'socket': '/var/run/mariadb/mysqld.sock',
     'config': '/etc/my.cnf',
   },
-}, merge=salt['pillar.get']('galera:slave')) %}
+}, merge=pillar.galera.get('slave', {})) %}

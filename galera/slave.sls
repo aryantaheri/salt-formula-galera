@@ -44,48 +44,56 @@ galera_run_dir:
   - group: root
   - require:
     - pkg: galera_packages
+
+galera_purge_init:
+  file.absent:
+  - name: /etc/init/mysql.conf
+  - require:
+    - pkg: galera_packages
+
+galera_conf_debian:
+  file.managed:
+  - name: /etc/mysql/debian.cnf
+  - template: jinja
+  - source: salt://galera/files/debian.cnf
+  - mode: 640
+  - require:
+    - pkg: galera_packages
+
 {%- endif %}
 
 galera_init_script:
   file.managed:
-  - name: /etc/init.d/mysql
-  - source: salt://galera/files/mysql
+  - name: /usr/local/sbin/galera_init.sh
   - mode: 755
-  - require: 
-    - pkg: galera_packages
+  - source: salt://galera/files/init_bootstrap.sh
+  - defaults:
+      service: {{ slave|yaml }}
+  - template: jinja
 
 galera_bootstrap_script:
   file.managed:
   - name: /usr/local/sbin/galera_bootstrap.sh
   - mode: 755
+  - defaults:
+      service: {{ slave|yaml }}
   - source: salt://galera/files/bootstrap.sh
   - template: jinja
 
 {%- if salt['cmd.run']('test -e /var/lib/mysql/.galera_bootstrap; echo $?') != '0'  %}
 
-galera_bootstrap_temp_config:
-  file.managed:
-  - name: {{ slave.config }}
-  - source: salt://galera/files/my.cnf.bootstrap
-  - mode: 644
-  - template: jinja
-  - require: 
-    - pkg: galera_packages
-    - file: galera_init_script
-
-galera_bootstrap_start_service:
+galera_init_start_service:
   cmd.run:
-  - name: /usr/local/sbin/galera_bootstrap.sh
+  - name: /usr/local/sbin/galera_init.sh
   - require: 
-    - file: galera_bootstrap_temp_config
     - file: galera_run_dir
-    - file: galera_bootstrap_script
+    - file: galera_init_script
 
 galera_bootstrap_set_root_password:
   cmd.run:
   - name: mysqladmin password "{{ slave.admin.password }}"
   - require:
-    - cmd: galera_bootstrap_start_service
+    - cmd: galera_init_start_service
 
 mysql_bootstrap_update_maint_password:
   cmd.run:
