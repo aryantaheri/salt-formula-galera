@@ -57,7 +57,7 @@ performance-schema-max-mutex-instances = 0
 wsrep_provider={{ service.wsrep_provider }}
 wsrep_on=ON
 wsrep_provider_options="gcache.size=512M; gmcast.segment=0"
-wsrep_cluster_name="my_wsrep_cluster"
+wsrep_cluster_name={{ service.name }}
 wsrep_cluster_address="gcomm://{% for member in service.members %}{{ member.host}}{% if not loop.last %},{% endif %}{% endfor %}"
 wsrep_slave_threads=8
 wsrep_certify_nonPK=1
