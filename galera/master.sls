@@ -1,6 +1,14 @@
 {%- from "galera/map.jinja" import master with context %}
 {%- if master.enabled %}
 
+galera_bootstrap_init_config:
+  file.managed:
+  - name: {{ master.config }}
+  - source: salt://galera/files/my.cnf.init
+  - mode: 644
+  - template: jinja
+  - makedirs: true
+
 {%- if grains.os_family == 'RedHat' %}
 xtrabackup_repo:
   pkg.installed:
@@ -25,6 +33,8 @@ galera_packages:
   pkg.installed:
   - names: {{ master.pkgs }}
   - refresh: true
+  - require:
+    - file: galera_bootstrap_init_config
 
 galera_log_dir:
   file.directory:
@@ -119,14 +129,14 @@ galera_bootstrap_stop_service:
   - require:
     - cmd: mysql_bootstrap_update_maint_password
 
-galera_bootstrap_init_config:
-  file.managed:
-  - name: {{ master.config }}
-  - source: salt://galera/files/my.cnf.init
-  - mode: 644
-  - template: jinja
-  - require: 
-    - service: galera_bootstrap_stop_service
+#galera_bootstrap_init_config:
+#  file.managed:
+#  - name: {{ master.config }}
+#  - source: salt://galera/files/my.cnf.init
+#  - mode: 644
+#  - template: jinja
+#  - require: 
+#    - service: galera_bootstrap_stop_service
 
 galera_bootstrap_start_service_final:
   cmd.run:
