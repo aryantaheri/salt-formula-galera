@@ -12,6 +12,9 @@
 
 [mysqld]
 datadir=/var/lib/mysql
+
+explicit_defaults_for_timestamp = 1
+
 bind-address={{ service.bind.address }}
 port=3306
 max_connections={{ service.get('max_connections', 20000) }}
@@ -21,7 +24,7 @@ collation-server=utf8_general_ci
 init-connect='SET NAMES utf8'
 character-set-server=utf8
 default-storage-engine=innodb
-
+log_error=/var/log/mysql/error.log
 skip-external-locking
 skip-name-resolve
 
@@ -37,14 +40,8 @@ query_cache_type=0
 innodb_file_format=Barracuda
 innodb_file_per_table=1
 #innodb_data_file_path = ibdata1:10M:autoextend
-## You may want to tune the below depending on number of cores and disk sub
 innodb_doublewrite=1
-#innodb_log_buffer_size=96M
-#innodb_buffer_pool_instances=8
-#innodb_log_files_in_group=2
 #innodb_thread_concurrency=64
-#innodb_flush_method = O_DIRECT
-
 innodb_buffer_pool_size=3138M
 innodb_log_file_size=627M
 innodb_read_io_threads=8
