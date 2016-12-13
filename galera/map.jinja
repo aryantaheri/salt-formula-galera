@@ -1,9 +1,9 @@
 
 {%- set master = salt['grains.filter_by']({
   'Debian': {
-    'pkgs': ['percona-xtradb-cluster-server-5.6', 'rsync', 'python-mysqldb', 'psmisc', 'netcat', 'socat'],
+    'pkgs': ['percona-xtradb-cluster-server-5.6', 'percona-xtradb-cluster-galera-3', 'rsync', 'python-mysqldb', 'psmisc', 'netcat', 'socat'],
     'service': 'mysql',
-    'wsrep_provider': '/usr/lib/galera/libgalera_smm.so',
+    'wsrep_provider': '/usr/lib/galera3/libgalera_smm.so',
     'log_file': '/var/log/mysql.log',
     'socket': '/var/run/mysqld/mysqld.sock',
     'config': '/etc/mysql/my.cnf',
@@ -21,9 +21,9 @@
 
 {%- set slave = salt['grains.filter_by']({
   'Debian': {
-    'pkgs': ['percona-xtradb-cluster-server-5.6', 'rsync', 'python-mysqldb', 'psmisc', 'netcat', 'socat'],
+    'pkgs': ['percona-xtradb-cluster-server-5.6', 'percona-xtradb-cluster-galera-3', 'rsync', 'python-mysqldb', 'psmisc', 'netcat', 'socat'],
     'service': 'mysql',
-    'wsrep_provider': '/usr/lib/galera/libgalera_smm.so',
+    'wsrep_provider': '/usr/lib/galera3/libgalera_smm.so',
     'log_file': '/var/log/mysql.log',
     'socket': '/var/run/mysqld/mysqld.sock',
     'config': '/etc/mysql/my.cnf',
